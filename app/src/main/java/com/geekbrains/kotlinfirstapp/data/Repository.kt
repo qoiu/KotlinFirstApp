@@ -1,24 +1,41 @@
 package com.geekbrains.kotlinfirstapp.data
 
-import com.geekbrains.kotlinfirstapp.App
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.geekbrains.kotlinfirstapp.data.entity.Note
+import java.util.*
 
 object Repository {
+    private val noteLiveData=MutableLiveData<List<Note>>()
+
     private var notes: MutableList<Note> = mutableListOf(
-            Note("Note 1", "this is first note", 0xfff062f0.toInt()),
-            Note("Note 2", "this is second note", 0xfff062f0.toInt()),
-            Note("Note 3", "this is third note", 0xfff0f092.toInt()),
-            Note("Note 4", "this is fourth note", 0xfff0f0f0.toInt()),
-            Note("Note 5", "this is fifth note", 0xff926292.toInt()),
-            Note("Note 6", "this is sixth note", 0xff626292.toInt())
+            Note(UUID.randomUUID().toString(),"Note 1", "this is first note", Note.Color.WHITE),
+            Note(UUID.randomUUID().toString(),"Note 2", "this is second note", Note.Color.BLUE),
+            Note(UUID.randomUUID().toString(),"Note 3", "this is third note", Note.Color.YELLOW),
+            Note(UUID.randomUUID().toString(),"Note 4", "this is fourth note", Note.Color.RED),
+            Note(UUID.randomUUID().toString(),"Note 5", "this is fifth note", Note.Color.GREEN),
+            Note(UUID.randomUUID().toString(),"Note 6", "this is sixth note", Note.Color.ORANGE)
     )
+
     init {
-        for(i in App.titles.indices){
-            notes.add(Note(i))
-        }
+        noteLiveData.value= notes
     }
 
-    fun getNote(): List<Note> {
-        return notes
+    fun saveNote(note: Note){
+        addOrReplace(note)
+        noteLiveData.value= notes
+    }
+
+    private fun addOrReplace(note: Note){
+        for(i in 0 until notes.size){
+            if(notes[i] == note){
+                notes[i]=note
+                return
+            }
+        }
+        notes.add(note)
+    }
+    fun getNote(): LiveData<List<Note>> {
+        return noteLiveData
     }
 }

@@ -1,12 +1,39 @@
 package com.geekbrains.kotlinfirstapp.data.entity
 
-import android.graphics.Color
-import com.geekbrains.kotlinfirstapp.App
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+import java.util.*
 
-class Note (var title: String, var text: String, val color: Int) {
-    constructor(id: Int, title: String="", text: String="",
-                color: Int=Color.rgb((75 until 180).random(),(75 until 180).random(), (75 until 180).random())) : this(title,text,color) {
-        this.title= App.titles[id]
-        this.text= App.textes[id]
+@Parcelize
+data class Note (
+        val id: String="",
+        val title: String="",
+        val text: String="",
+        val color: Color=Color.WHITE,
+        val lastChanged: Date= Date()
+): Parcelable {
+
+    override fun equals(other: Any?): Boolean {
+        if(this === other) return true
+        if(javaClass != other?.javaClass)return false
+        other as Note
+        if(id != other.id)return false
+        return true
     }
+
+    override fun toString(): String {
+        return  "$title\n$text"
+    }
+
+
+    enum class Color{
+        WHITE,
+        YELLOW,
+        GREEN,
+        BLUE,
+        RED,
+        ORANGE,
+        VIOLET
+    }
+
 }
