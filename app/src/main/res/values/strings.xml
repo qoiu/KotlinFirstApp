@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">KotlinFirstApp</string>
+    <string name="note_new">new note</string>
+    <string name="color">Color</string>
+    <string name="note_text">Текст заметки</string>
+    <string name="note_title">Заголовок</string>
 </resources>
