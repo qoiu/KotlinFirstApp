@@ -25,6 +25,7 @@ data class Note (
         return  "$title\n$text"
     }
 
+    override fun hashCode() = id.hashCode()
 
     enum class Color{
         WHITE,

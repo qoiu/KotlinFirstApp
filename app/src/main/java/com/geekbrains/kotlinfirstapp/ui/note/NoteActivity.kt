@@ -1,42 +1,40 @@
 package com.geekbrains.kotlinfirstapp.ui.note
 
-import com.geekbrains.kotlinfirstapp.ui.note.NoteViewModel
-
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.GridLayoutManager
 import com.geekbrains.kotlinfirstapp.R
 import com.geekbrains.kotlinfirstapp.data.entity.Note
-import kotlinx.android.synthetic.main.activity_main.*
+import com.geekbrains.kotlinfirstapp.ui.base.BaseActivity
 import kotlinx.android.synthetic.main.activity_main.toolbar
 import kotlinx.android.synthetic.main.activity_note.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NoteActivity : AppCompatActivity() {
+class NoteActivity : BaseActivity<Note?, NoteViewState>() {
 
     companion object {
         private val EXTRA_NOTE = "extraNote"
-        private val DATE_TIME_FORMAT = "dd.MM.yy HH:mm"
-        fun start(context: Context, note: Note? = null) = Intent(context, NoteActivity::class.java).run {
-            putExtra(EXTRA_NOTE, note)
+        private const val DATE_TIME_FORMAT = "dd.MM.yy HH:mm"
+        fun start(context: Context, noteId: String? = null) = Intent(context, NoteActivity::class.java).run {
+            putExtra(EXTRA_NOTE, noteId)
             context.startActivity(this)
         }
-
     }
 
     private var note: Note? = null
+    override  val viewModel: NoteViewModel by lazy {
+        ViewModelProvider(this).get(NoteViewModel::class.java)
+    }
+    override val layoutRes = R.layout.activity_note
+
     lateinit var noteColor: Note.Color
-    private lateinit var viewModel: NoteViewModel
 
     val textChangeListener = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {
@@ -50,19 +48,15 @@ class NoteActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_note)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayUseLogoEnabled(true)
-        note = intent.getParcelableExtra(EXTRA_NOTE)
+        val noteId = intent.getStringExtra(EXTRA_NOTE)
+        noteId?.let{
+            viewModel.loadNote(it)
+        } ?: let {
+            supportActionBar?.title = getString(R.string.note_new)
+        }
         noteColor= note?.color ?: Note.Color.WHITE
-
-        viewModel = ViewModelProvider(this).get(NoteViewModel::class.java)
-
-        supportActionBar?.title = note?.let {
-            SimpleDateFormat(DATE_TIME_FORMAT, Locale.getDefault()).format(it.lastChanged)
-        } ?: getString(R.string.note_new)
-
         colorBtn.setOnClickListener {
             noteColor=Note.Color.values()[
                     if (noteColor.ordinal+1 < Note.Color.values().size) noteColor.ordinal+1
@@ -70,9 +64,20 @@ class NoteActivity : AppCompatActivity() {
             ]
             saveNote()
         }
+
+    }
+
+    override fun renderData(data: Note?) {
+        this.note = data
+        supportActionBar?.title = note?.let {
+            SimpleDateFormat(DATE_TIME_FORMAT, Locale.getDefault()).format(it.lastChanged)
+        } ?: let {
+            getString(R.string.note_new)
+        }
         initView()
     }
-    fun Note.Color.getColor()= when (this) {
+
+    private fun Note.Color.getColor()= when (this) {
         Note.Color.ORANGE -> R.color.color_orange
         Note.Color.GREEN -> R.color.color_green
         Note.Color.RED -> R.color.color_red
@@ -81,13 +86,18 @@ class NoteActivity : AppCompatActivity() {
         Note.Color.WHITE -> R.color.color_white
         Note.Color.VIOLET -> R.color.color_violet
     }
+
+
     private fun initView() {
+        titleEt.removeTextChangedListener(textChangeListener)
+        bodyEt.removeTextChangedListener(textChangeListener)
+
         note?.let {
             titleEt.setText(it.title)
             bodyEt.setText(it.text)
             resetColor()
-
         }
+
         titleEt.addTextChangedListener(textChangeListener)
         bodyEt.addTextChangedListener(textChangeListener)
     }
@@ -111,9 +121,6 @@ class NoteActivity : AppCompatActivity() {
             viewModel.save(it)
         }
         resetColor()
-
-
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when(item.itemId) {
