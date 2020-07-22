@@ -1,19 +1,32 @@
 package com.geekbrains.kotlinfirstapp.ui.main
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.Observer
 import com.geekbrains.kotlinfirstapp.data.Repository
+import com.geekbrains.kotlinfirstapp.data.entity.Note
+import com.geekbrains.kotlinfirstapp.data.model.NoteResult
+import com.geekbrains.kotlinfirstapp.ui.base.BaseViewModel
 
-class MainViewModel : ViewModel(){
-    private val viewStateLiveData = MutableLiveData<MainViewState>()
+class MainViewModel : BaseViewModel<List<Note>?,MainViewState>(){
 
-    init {
-        Repository.getNote().observeForever{
-            viewStateLiveData.value= viewStateLiveData.value?.copy(notes = it) ?: MainViewState(it)
+
+    private val noteObserver = Observer{result: NoteResult ->
+        when(result){
+            is NoteResult.Success<*> -> viewStateLiveData.value = MainViewState(notes = result.data as? List<Note>)
+            is NoteResult.Error -> viewStateLiveData.value = MainViewState(error = result.error)
         }
     }
 
-    fun viewState(): LiveData<MainViewState> = viewStateLiveData
+    private val repository = Repository.getNotes()
 
+    init {
+        Repository.getNotes().observeForever{
+            viewStateLiveData.value= MainViewState()
+            repository.observeForever(noteObserver)
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.removeObserver(noteObserver)
+    }
 }
