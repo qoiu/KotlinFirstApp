@@ -5,11 +5,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import com.geekbrains.kotlinfirstapp.R
+import com.geekbrains.kotlinfirstapp.data.common.getColor
 import com.geekbrains.kotlinfirstapp.data.entity.Note
 import com.geekbrains.kotlinfirstapp.ui.base.BaseActivity
 import kotlinx.android.synthetic.main.activity_main.toolbar
@@ -20,7 +22,7 @@ import java.util.*
 class NoteActivity : BaseActivity<Note?, NoteViewState>() {
 
     companion object {
-        private val EXTRA_NOTE = "extraNote"
+        private const val EXTRA_NOTE = "extraNote"
         private const val DATE_TIME_FORMAT = "dd.MM.yy HH:mm"
         fun start(context: Context, noteId: String? = null) = Intent(context, NoteActivity::class.java).run {
             putExtra(EXTRA_NOTE, noteId)
@@ -29,10 +31,10 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
     }
 
     private var note: Note? = null
+    override val layoutRes: Int = R.layout.activity_note
     override  val viewModel: NoteViewModel by lazy {
         ViewModelProvider(this).get(NoteViewModel::class.java)
     }
-    override val layoutRes = R.layout.activity_note
 
     lateinit var noteColor: Note.Color
 
@@ -62,6 +64,8 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
                     if (noteColor.ordinal+1 < Note.Color.values().size) noteColor.ordinal+1
                     else Note.Color.WHITE.ordinal
             ]
+            resetColor()
+            Toast.makeText(this,noteColor.toString(),Toast.LENGTH_SHORT).show()
             saveNote()
         }
 
@@ -77,17 +81,6 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
         initView()
     }
 
-    private fun Note.Color.getColor()= when (this) {
-        Note.Color.ORANGE -> R.color.color_orange
-        Note.Color.GREEN -> R.color.color_green
-        Note.Color.RED -> R.color.color_red
-        Note.Color.YELLOW -> R.color.color_yellow
-        Note.Color.BLUE -> R.color.color_blue
-        Note.Color.WHITE -> R.color.color_white
-        Note.Color.VIOLET -> R.color.color_violet
-    }
-
-
     private fun initView() {
         titleEt.removeTextChangedListener(textChangeListener)
         bodyEt.removeTextChangedListener(textChangeListener)
@@ -102,11 +95,9 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
         bodyEt.addTextChangedListener(textChangeListener)
     }
 
-    fun resetColor(){
-        note?.let {
-        toolbar.setBackgroundColor(ResourcesCompat.getColor(resources, it.color.getColor(), null))
-        colorBtn.setBackgroundColor(ResourcesCompat.getColor(resources, it.color.getColor(), null))
-        }
+    private fun resetColor(){
+        toolbar.setBackgroundColor(noteColor.getColor(this))
+        colorBtn.setBackgroundColor( noteColor.getColor(this))
     }
 
     fun saveNote() {
@@ -116,11 +107,12 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
                 title = titleEt.text.toString(),
                 color = noteColor,
                 lastChanged = Date()
-        ) ?: Note(UUID.randomUUID().toString(),title = titleEt.text.toString(),text = bodyEt.text.toString())
+        ) ?: Note(UUID.randomUUID().toString(),title = titleEt.text.toString(),text = bodyEt.text.toString(),color=noteColor)
         note?.let {
             viewModel.save(it)
         }
-        resetColor()
+        Log.e("save","saved")
+        Toast.makeText(this,"saved",Toast.LENGTH_SHORT).show()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when(item.itemId) {
@@ -128,7 +120,8 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
             onBackPressed()
             true
         }
-        else-> {Toast.makeText(this,item.toString(),Toast.LENGTH_LONG).show()
-        super.onOptionsItemSelected(item)}
+        else-> {
+        super.onOptionsItemSelected(item)
+        }
     }
 }

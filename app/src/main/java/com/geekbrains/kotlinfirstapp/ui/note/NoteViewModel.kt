@@ -7,6 +7,7 @@ import com.geekbrains.kotlinfirstapp.ui.base.BaseViewModel
 
 class NoteViewModel : BaseViewModel<Note?,NoteViewState>() {
     private var pendingNote: Note? = null
+
     fun save(note: Note){
         pendingNote=note
     }

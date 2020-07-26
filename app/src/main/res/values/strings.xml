@@ -4,4 +4,11 @@
     <string name="color">Color</string>
     <string name="note_text">Текст заметки</string>
     <string name="note_title">Заголовок</string>
+    <string name="logout_title">Выход</string>
+    <string name="logout_message">Вы уверены?</string>
+    <string name="logout_positive">Да</string>
+    <string name="logout_negative">Нет</string>
+    <string name="logout_menu_title">Выход</string>
+    <string name="title">Выход</string>
+    <string name="title1">Ds</string>
 </resources>
