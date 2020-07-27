@@ -11,4 +11,7 @@
     <string name="logout_menu_title">Выход</string>
     <string name="title">Выход</string>
     <string name="title1">Ds</string>
+    <string name="menu_palette">палитра</string>
+    <string name="menu_note_delete">Удалить</string>
+    <string name="dialog_delete">Удалить заметку?</string>
 </resources>

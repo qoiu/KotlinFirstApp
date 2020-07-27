@@ -1,30 +1,49 @@
 package com.geekbrains.kotlinfirstapp.ui.note
 
+import androidx.lifecycle.Observer
 import com.geekbrains.kotlinfirstapp.data.Repository
+import com.geekbrains.kotlinfirstapp.data.common.observeOnce
 import com.geekbrains.kotlinfirstapp.data.entity.Note
 import com.geekbrains.kotlinfirstapp.data.model.NoteResult
 import com.geekbrains.kotlinfirstapp.ui.base.BaseViewModel
 
-class NoteViewModel : BaseViewModel<Note?,NoteViewState>() {
-    private var pendingNote: Note? = null
+class NoteViewModel(val repository: Repository) : BaseViewModel<NoteViewState.Data, NoteViewState>() {
 
-    fun save(note: Note){
-        pendingNote=note
+    init {
+        viewStateLiveData.value = NoteViewState()
     }
 
-    fun loadNote(noteId: String){
-        Repository.getNoteById(noteId).observeForever {result ->
-            result ?: return@observeForever
-            when(result){
-                is NoteResult.Success<*> -> viewStateLiveData.value= NoteViewState(note = result.data as? Note)
-                is NoteResult.Error -> viewStateLiveData.value= NoteViewState(error = result.error)
+    private val pendingNote: Note?
+        get() = viewStateLiveData.value?.data?.note
+
+    fun save(note: Note) {
+        viewStateLiveData.value = NoteViewState(NoteViewState.Data(note = note))
+    }
+
+    fun loadNote(noteId: String) {
+        repository.getNoteById(noteId).observeOnce(Observer { result ->
+            result ?: return@Observer
+            viewStateLiveData.value = when (result) {
+                is NoteResult.Success<*> -> NoteViewState(NoteViewState.Data(note = result.data as? Note))
+                is NoteResult.Error -> NoteViewState(error = result.error)
             }
+        })
+    }
+
+    fun deleteNote(){
+        pendingNote?.let {
+            repository.deleteNote(it.id).observeOnce(Observer { result->
+                viewStateLiveData.value = when (result) {
+                    is NoteResult.Success<*> -> NoteViewState(NoteViewState.Data(isDeleted = true))
+                    is NoteResult.Error -> NoteViewState(error = result.error)
+                }
+            })
         }
     }
 
     override fun onCleared() {
         pendingNote?.let {
-            Repository.saveNote(it)
+            repository.saveNote(it)
         }
     }
 }
