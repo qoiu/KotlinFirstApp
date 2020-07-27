@@ -18,8 +18,9 @@ import com.geekbrains.kotlinfirstapp.ui.base.BaseActivity
 import com.geekbrains.kotlinfirstapp.ui.note.NoteActivity
 import com.geekbrains.kotlinfirstapp.ui.splash.SplashActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import org.koin.android.viewmodel.ext.android.viewModel
 
-class MainActivity : BaseActivity<List<Note>?, MainViewState>() , LogoutDialog.LogoutListener{
+class MainActivity : BaseActivity<List<Note>?, MainViewState>() {
     private lateinit var adapter: NotesRVAdapter
 
     companion object {
@@ -28,9 +29,7 @@ class MainActivity : BaseActivity<List<Note>?, MainViewState>() , LogoutDialog.L
         }
     }
 
-    override val viewModel: MainViewModel by lazy {
-        ViewModelProvider(this).get(MainViewModel::class.java)
-    }
+    override val viewModel: MainViewModel by viewModel()
     override val layoutRes = R.layout.activity_main
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,13 +73,4 @@ class MainActivity : BaseActivity<List<Note>?, MainViewState>() , LogoutDialog.L
     }
     }
 
-    override fun onLogout() {
-        AuthUI.getInstance()
-            .signOut(this)
-            .addOnCompleteListener {
-                startActivity(Intent(this, SplashActivity::class.java))
-                finish()
-            }
-
-    }
 }

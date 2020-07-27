@@ -8,6 +8,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.geekbrains.kotlinfirstapp.R
 import com.geekbrains.kotlinfirstapp.data.entity.Note
+import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_note.view.*
 
@@ -29,7 +30,7 @@ class NotesRVAdapter(val onItemClick: ((Note)->Unit)?=null): RecyclerView.Adapte
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(notes[position])
 
 
-    inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(override val containerView: View): RecyclerView.ViewHolder(containerView), LayoutContainer {
         fun bind(note: Note) = with(itemView){
             title.text=note.title
             body.text=note.text

@@ -75,4 +75,5 @@ abstract class BaseActivity<T, S : BaseViewState<T>> : AppCompatActivity() {
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
+
 }
