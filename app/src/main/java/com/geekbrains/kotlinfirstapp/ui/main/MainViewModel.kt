@@ -6,7 +6,7 @@ import com.geekbrains.kotlinfirstapp.data.entity.Note
 import com.geekbrains.kotlinfirstapp.data.model.NoteResult
 import com.geekbrains.kotlinfirstapp.ui.base.BaseViewModel
 
-class MainViewModel : BaseViewModel<List<Note>?,MainViewState>(){
+class MainViewModel(val repository: Repository) : BaseViewModel<List<Note>?,MainViewState>(){
 
 
     private val noteObserver = Observer{result: NoteResult ->
@@ -16,17 +16,17 @@ class MainViewModel : BaseViewModel<List<Note>?,MainViewState>(){
         }
     }
 
-    private val repository = Repository.getNotes()
+    private val repositoryNotes = repository.getNotes()
 
     init {
-        Repository.getNotes().observeForever{
+        repositoryNotes.observeForever{
             viewStateLiveData.value= MainViewState()
-            repository.observeForever(noteObserver)
+            repositoryNotes.observeForever(noteObserver)
         }
     }
 
     override fun onCleared() {
         super.onCleared()
-        repository.removeObserver(noteObserver)
+        repositoryNotes.removeObserver(noteObserver)
     }
 }

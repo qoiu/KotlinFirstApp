@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#c2c2c2</color>
     <color name="colorAccent">#e040fb</color>
 
+    <color name="text_secondary">#66000000</color>
+
     <color name="color_white">#F5F5F5</color>
     <color name="color_yellow">#FFF59D</color>
     <color name="color_green">#81C784</color>
@@ -12,4 +14,5 @@
     <color name="color_orange">#FFBB80</color>
     <color name="color_violet">#e1bee7</color>
     <color name="color_pink">#f8bbd0</color>
+    <color name="color_black">#000000</color>
 </resources>
