@@ -1,5 +1,6 @@
 package com.geekbrains.kotlinfirstapp.ui.note
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Observer
 import com.geekbrains.kotlinfirstapp.data.Repository
 import com.geekbrains.kotlinfirstapp.data.common.observeOnce
@@ -33,6 +34,7 @@ class NoteViewModel(val repository: Repository) : BaseViewModel<NoteViewState.Da
     fun deleteNote(){
         pendingNote?.let {
             repository.deleteNote(it.id).observeOnce(Observer { result->
+                result?:return@Observer
                 viewStateLiveData.value = when (result) {
                     is NoteResult.Success<*> -> NoteViewState(NoteViewState.Data(isDeleted = true))
                     is NoteResult.Error -> NoteViewState(error = result.error)
@@ -41,7 +43,8 @@ class NoteViewModel(val repository: Repository) : BaseViewModel<NoteViewState.Da
         }
     }
 
-    override fun onCleared() {
+    @VisibleForTesting
+    public override fun onCleared() {
         pendingNote?.let {
             repository.saveNote(it)
         }
