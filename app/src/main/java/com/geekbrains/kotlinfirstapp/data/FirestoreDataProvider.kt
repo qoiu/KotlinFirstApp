@@ -27,7 +27,6 @@ class FirestoreDataProvider(val store: FirebaseFirestore,val auth: FirebaseAuth)
         value = currentUser?.let {
             User(it.displayName ?: "", it.email ?: "")
         }
-
     }
 
     override fun subscribeToAllNotes(): LiveData<NoteResult> = MutableLiveData<NoteResult>().apply {
@@ -43,14 +42,13 @@ class FirestoreDataProvider(val store: FirebaseFirestore,val auth: FirebaseAuth)
         } catch (e: Throwable) {
             value = NoteResult.Error(e)
         }
-
     }
 
     override fun getNoteById(id: String): LiveData<NoteResult> = MutableLiveData<NoteResult>().apply {
         try {
             userNoteCollection().document(id).get()
-                    .addOnSuccessListener { snapshot ->
-                        value = NoteResult.Success(snapshot.toObject(Note::class.java))
+                    .addOnSuccessListener {
+                        value = NoteResult.Success(it.toObject(Note::class.java))
                     }.addOnFailureListener {
                         value = NoteResult.Error(it)
                     }
@@ -63,7 +61,7 @@ class FirestoreDataProvider(val store: FirebaseFirestore,val auth: FirebaseAuth)
     override fun saveNote(note: Note): LiveData<NoteResult> = MutableLiveData<NoteResult>().apply {
         try {
             userNoteCollection().document(note.id).set(note)
-                    .addOnSuccessListener { snapshot ->
+                    .addOnSuccessListener {
                         value = NoteResult.Success(note)
                     }.addOnFailureListener {
                         value = NoteResult.Error(it)
@@ -76,7 +74,7 @@ class FirestoreDataProvider(val store: FirebaseFirestore,val auth: FirebaseAuth)
     override fun deleteNote(noteId: String): LiveData<NoteResult> = MutableLiveData<NoteResult>().apply {
         try {
             userNoteCollection().document(noteId).delete()
-                    .addOnSuccessListener { snapshot ->
+                    .addOnSuccessListener {
                         value = NoteResult.Success(null)
                     }.addOnFailureListener {
                         value = NoteResult.Error(it)
