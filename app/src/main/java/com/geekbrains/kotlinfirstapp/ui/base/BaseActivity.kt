@@ -10,15 +10,24 @@ import com.firebase.ui.auth.AuthUI
 import com.geekbrains.kotlinfirstapp.R
 import com.geekbrains.kotlinfirstapp.data.error.NoAuthException
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.consumeEach
+import kotlin.coroutines.CoroutineContext
 
-abstract class BaseActivity<T, S : BaseViewState<T>> : AppCompatActivity() {
+abstract class BaseActivity<S> : AppCompatActivity() , CoroutineScope {
 
 
     companion object {
         private const val REQUEST_CODE = 4242
     }
 
-    abstract val viewModel: BaseViewModel<T, S>
+    override val coroutineContext: CoroutineContext by lazy {
+        Dispatchers.Main + Job()
+    }
+
+     private lateinit var dataJob: Job
+     private lateinit var errorJob: Job
+    abstract val viewModel: BaseViewModel<S>
     abstract val layoutRes: Int?
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,13 +35,20 @@ abstract class BaseActivity<T, S : BaseViewState<T>> : AppCompatActivity() {
         layoutRes?.let {
             setContentView(it)
         }
-        setSupportActionBar(toolbar)
+    }
 
-        viewModel.getViewState().observe(this, Observer { state ->
-            state.error?.let {
+    override fun onStart() {
+        super.onStart()
+        dataJob = launch {
+            viewModel.getViewState().consumeEach {
+                renderData(it)
+            }
+        }
+        errorJob = launch {
+            viewModel.getErrorChannel().consumeEach {
                 renderError(it)
-            } ?: renderData(state.data)
-        })
+            }
+        }
     }
 
     protected fun renderError(error: Throwable) {
@@ -51,7 +67,7 @@ abstract class BaseActivity<T, S : BaseViewState<T>> : AppCompatActivity() {
         Toast.makeText(this, eror, Toast.LENGTH_SHORT).show()
     }
 
-    abstract fun renderData(data: T)
+    abstract fun renderData(data: S)
 
     fun startLogin() {
         val providers = listOf(
@@ -76,4 +92,14 @@ abstract class BaseActivity<T, S : BaseViewState<T>> : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    override fun onStop() {
+        super.onStop()
+        dataJob.cancel()
+        errorJob.cancel()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        coroutineContext.cancel()
+    }
 }

@@ -20,7 +20,7 @@ import com.geekbrains.kotlinfirstapp.ui.splash.SplashActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class MainActivity : BaseActivity<List<Note>?, MainViewState>() {
+class MainActivity : BaseActivity<List<Note>?>() {
     private lateinit var adapter: NotesRVAdapter
 
     companion object {
