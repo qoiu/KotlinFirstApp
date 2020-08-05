@@ -6,26 +6,20 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.Toast
-import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
-import androidx.lifecycle.ViewModelProvider
 import com.geekbrains.kotlinfirstapp.R
 import com.geekbrains.kotlinfirstapp.data.common.getColor
 import com.geekbrains.kotlinfirstapp.data.entity.Note
 import com.geekbrains.kotlinfirstapp.ui.base.BaseActivity
 import com.geekbrains.kotlinfirstapp.ui.main.LogoutDialog
-import kotlinx.android.synthetic.main.activity_main.toolbar
 import kotlinx.android.synthetic.main.activity_note.*
-import org.koin.android.viewmodel.ext.android.viewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import org.koin.android.viewmodel.ext.android.viewModel
 
-class NoteActivity : BaseActivity<NoteViewState.Data, NoteViewState>() {
+class NoteActivity : BaseActivity<NoteData>() {
 
     companion object {
         private const val EXTRA_NOTE = "extraNote"
@@ -66,7 +60,7 @@ class NoteActivity : BaseActivity<NoteViewState.Data, NoteViewState>() {
 
     }
 
-    override fun renderData(data: NoteViewState.Data) {
+    override fun renderData(data: NoteData) {
         if(data.isDeleted)finish()
         this.note = data.note
         supportActionBar?.title = note?.let {
@@ -129,7 +123,6 @@ class NoteActivity : BaseActivity<NoteViewState.Data, NoteViewState>() {
     private fun deleteNote(){
         LogoutDialog(positiveListener = DialogInterface.OnClickListener { _, _ -> viewModel.deleteNote()}, title = getString(R.string.dialog_delete))
                 .show(supportFragmentManager, LogoutDialog.TAG)
-
     }
 
     private fun togglePalette(){
@@ -139,5 +132,6 @@ class NoteActivity : BaseActivity<NoteViewState.Data, NoteViewState>() {
             colorPicker.open()
         }
     }
+
 
 }
